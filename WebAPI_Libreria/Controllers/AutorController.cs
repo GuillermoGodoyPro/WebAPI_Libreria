@@ -12,7 +12,8 @@ namespace WebAPI_Libreria.Controllers
     [ApiController]
     public class AutorController : ControllerBase
     {
-        private AppDbContext _context;
+
+        private readonly AppDbContext _context;
         public AutorController(AppDbContext context)
         {
             _context = context; // Esto es inyectar dependencias
@@ -22,13 +23,25 @@ namespace WebAPI_Libreria.Controllers
         public ActionResult<List<Autor>> Get()
         {
             var Autores = _context.Autores.ToList();
-
             return Ok(Autores);
         }
 
+        [HttpGet("{id}", Name = "ObtenerAutor")]
+        public ActionResult<Autor> GetWith(int id)
+        {
+            var autor = _context.Autores.FirstOrDefault(x => x.Id == id);
+
+            if (autor == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(autor);
+        }
 
 
-        [HttpPost]
+        /*
+         * [HttpPost]
         public ActionResult Post(Autor d)
         {
             if (!ModelState.IsValid)
@@ -40,6 +53,9 @@ namespace WebAPI_Libreria.Controllers
             _context.SaveChanges();
             return Ok();
         }
+         
+         */
+
 
         //SELECT BY NAME
         [HttpGet("name/{name}")]
@@ -85,6 +101,8 @@ namespace WebAPI_Libreria.Controllers
             return autorDeleted;
 
         }
+
+        /*
         //SELECT BY ID
         [HttpGet("{id}")]
         public ActionResult<Autor> GetById(int id)
@@ -93,6 +111,20 @@ namespace WebAPI_Libreria.Controllers
                              where d.Id == id
                              select d).SingleOrDefault();
             return autorById;
+        } 
+         */
+
+
+        [HttpPost]
+        public ActionResult PostOfProof([FromBody] Autor autor)
+        {
+            _context.Autores.Add(autor);
+            _context.SaveChanges();
+
+            //en el primer parámetro le indico donde quiero que vaya, en el segundo crea un objeto para que busque en ese id y le paso autor también
+            //osea agrego ese autor, con ese ID a esa ruta (Obtener autor)
+            return new CreatedAtRouteResult("ObetenerAutor", new {id = autor.Id}, autor);
+
         }
 
 
