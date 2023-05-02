@@ -19,11 +19,23 @@ namespace WebAPI_Libreria.Controllers
             _context = context; // Esto es inyectar dependencias
         }
 
+        /* ---------GET---------*/
         [HttpGet]
         public ActionResult<List<Autor>> Get()
         {
             var Autores = _context.Autores.ToList();
             return Ok(Autores);
+        }
+
+        //SELECT BY NAME
+        [HttpGet("name/{name}")]
+        public ActionResult<Autor> GetByName(string name)
+        {
+            var nombreGet = (from d in _context.Autores
+                             where d.Nombre == name
+                             select d).SingleOrDefault();
+
+            return nombreGet;
         }
 
         [HttpGet("{id}", Name = "ObtenerAutor")]
@@ -39,7 +51,7 @@ namespace WebAPI_Libreria.Controllers
             return Ok(autor);
         }
 
-
+        /*---------POST---------*/
         /*
          * [HttpPost]
         public ActionResult Post(Autor d)
@@ -55,20 +67,25 @@ namespace WebAPI_Libreria.Controllers
         }
          
          */
-
-
-        //SELECT BY NAME
-        [HttpGet("name/{name}")]
-        public ActionResult<Autor> GetByName(string name)
+         
+        [HttpPost]
+        public ActionResult PostOfProof([FromBody] Autor autor)
         {
-            var nombreGet = (from d in _context.Autores
-                             where d.Nombre == name
-                             select d).SingleOrDefault();
+            _context.Autores.Add(autor);
+            _context.SaveChanges();
 
-            return nombreGet;
+            //en el primer parámetro le indico donde quiero que vaya, en el segundo crea un objeto para que busque en ese id y le paso autor también
+            //osea agrego ese autor, con ese ID a esa ruta (Obtener autor)
+            return new CreatedAtRouteResult("ObetenerAutor", new { id = autor.Id }, autor);
+
         }
 
+        
+
+        /* ---------PUT---------*/
         //UPDATE        
+       
+        /*
         [HttpPut("{id}")]
         public ActionResult Put(int id, Autor d)
         {
@@ -81,6 +98,22 @@ namespace WebAPI_Libreria.Controllers
             _context.SaveChanges();
             return Ok();
         }
+        */
+
+        [HttpPut]
+        public ActionResult Put( int id, [FromBody] Autor autor)
+        {
+            if( id != autor.Id)
+            {
+                BadRequest();
+            }
+            _context.Entry(autor).State = EntityState.Modified;
+            _context.SaveChanges();
+            return Ok();
+        }
+
+
+        /* ---------DELETE---------*/
 
         //DELETE        
         [HttpDelete("{id}")]
@@ -99,7 +132,16 @@ namespace WebAPI_Libreria.Controllers
             _context.SaveChanges();
 
             return autorDeleted;
-
+            /*
+            var result = _context.Autores.FirstOrDefault(a=>a.Id == id);
+            if(result == null){
+                return NotFound();
+            }
+            _context.Autores.Remove(autorDeleted);
+            _context.SaveChanges();
+             
+            return autorDeleted;
+             */
         }
 
         /*
@@ -113,21 +155,6 @@ namespace WebAPI_Libreria.Controllers
             return autorById;
         } 
          */
-
-
-        [HttpPost]
-        public ActionResult PostOfProof([FromBody] Autor autor)
-        {
-            _context.Autores.Add(autor);
-            _context.SaveChanges();
-
-            //en el primer parámetro le indico donde quiero que vaya, en el segundo crea un objeto para que busque en ese id y le paso autor también
-            //osea agrego ese autor, con ese ID a esa ruta (Obtener autor)
-            return new CreatedAtRouteResult("ObetenerAutor", new {id = autor.Id}, autor);
-
-        }
-
-
 
     }
 }
