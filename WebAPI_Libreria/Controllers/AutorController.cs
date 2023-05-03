@@ -100,12 +100,12 @@ namespace WebAPI_Libreria.Controllers
         }
         */
 
-        [HttpPut]
+        [HttpPut("{id}")]
         public ActionResult Put( int id, [FromBody] Autor autor)
         {
             if( id != autor.Id)
             {
-                BadRequest();
+                return BadRequest();
             }
             _context.Entry(autor).State = EntityState.Modified;
             _context.SaveChanges();
