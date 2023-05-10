@@ -23,7 +23,7 @@ namespace WebAPI_Libreria.Controllers
         [HttpGet]
         public ActionResult<List<Autor>> Get()
         {
-            var Autores = _context.Autores.ToList();
+            var Autores = _context.Autores.Include(x => x.Libros ).ToList();
             return Ok(Autores);
         }
 
@@ -41,9 +41,9 @@ namespace WebAPI_Libreria.Controllers
         [HttpGet("{id}", Name = "ObtenerAutor")]
         public ActionResult<Autor> GetWith(int id)
         {
-            var autor = _context.Autores.FirstOrDefault(x => x.Id == id);
+            var autor = _context.Autores.Include(x=>x.Libros).FirstOrDefault(x => x.Id == id);
 
-            if (autor == null)
+            if (autor == null) 
             {
                 return NotFound();
             }
